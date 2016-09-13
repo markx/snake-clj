@@ -1,7 +1,7 @@
 (ns snake-clj.core
   (:require [quil.core :as q]
             [quil.middleware :as m])
-  )
+  (:gen-class))
 
 (def field-width 10)
 (def field-height 10)
@@ -15,6 +15,9 @@
 
 (defn create-apple []
   {:position [(rand-int field-width) (rand-int field-height)]})
+
+(defn create-apple-away-from-snake [{body :body}] 
+  (first (remove #(contains? (set body) (:position %)) (repeatedly create-apple))))
 
 (defn move-forward [head heading]
   (map + head heading))
@@ -54,7 +57,8 @@
 
 (defn update-step [{:keys  [snake apple] :as state}]
   (if (eat? snake apple)
-    (assoc state :snake (move snake true) :apple (create-apple))
+    (let [new-snake (move snake true)] 
+      (assoc state :snake new-snake :apple (create-apple-away-from-snake new-snake)))
     (assoc state :snake (move snake false))))
 
 (defn time-to-move? [timer]
@@ -90,11 +94,11 @@
         (update-in [:snake] update-direction)
         )))
 
-(defn draw-point [x y]
-  (apply q/rect (map-point-to-rect x y)))
-
 (defn map-point-to-rect [x y]
   [(* scale x) (* scale y) scale scale])
+
+(defn draw-point [x y]
+  (apply q/rect (map-point-to-rect x y)))
 
 (defn draw-apple [{position :position}]
   (q/fill 255 0 0)
