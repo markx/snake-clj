@@ -106,6 +106,7 @@
 
 (defn draw-snake [{body :body}]
   (q/fill 0 0 255)
+  (q/stroke 0 0 0)
   (dorun (map (partial apply draw-point) body )))
 
 (defn draw-field [width height]
